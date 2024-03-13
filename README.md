@@ -16,6 +16,16 @@ supports some additional capabilities:
 * Merge a [`YamlHash`] with another [`YamlHash`] or a YAML hash string to create a new [`YamlHash`]
   via [`merge`][`YamlHash::merge`], [`merge_str`][`YamlHash::merge_str`]
 
+[`&str`]: https://doc.rust-lang.org/nightly/std/primitive.str.html
 [`serde`]: https://docs.rs/serde
 [`serde_yaml`]: https://docs.rs/serde_yaml
+[`String`]: https://doc.rust-lang.org/nightly/alloc/string/struct.String.html
+[`yaml_rust2`]: https://docs.rs/yaml-rust2
+[`yaml_rust2::Yaml`]: https://docs.rs/yaml-rust2/latest/yaml_rust2/yaml/enum.Yaml.html
+[`yaml_rust2::yaml::Hash`]: https://docs.rs/yaml-rust2/latest/yaml_rust2/yaml/type.Hash.html
+[`YamlHash`]: https://docs.rs/yaml-hash/latest/yaml_hash/struct.YamlHash.html
+[`YamlHash::get`]: https://docs.rs/yaml-hash/latest/yaml_hash/struct.YamlHash.html#method.get
+[`YamlHash::get_yaml`]: https://docs.rs/yaml-hash/latest/yaml_hash/struct.YamlHash.html#method.get_yaml
+[`YamlHash::merge`]: https://docs.rs/yaml-hash/latest/yaml_hash/struct.YamlHash.html#method.merge
+[`YamlHash::merge_str`]: https://docs.rs/yaml-hash/latest/yaml_hash/struct.YamlHash.html#method.merge_str
 
