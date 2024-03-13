@@ -4,8 +4,8 @@ Improved YAML Hash
 If the YAML data you're working with is well-defined and you want to write the necessary types, you
 should use [`serde`] and [`serde_yaml`].
 
-Otherwise, [`yaml_rust2`] provides a foundation for supporting either varied YAML data or in
-instances where you don't want to write the necessary types.
+Otherwise, [`yaml_rust2`] provides a foundation for working with varied YAML data or when you don't
+want to write the necessary types.
 
 This crate provides the [`YamlHash`] struct, which is a wrapper for [`yaml_rust2::yaml::Hash`], and
 supports some additional capabilities:
@@ -14,8 +14,9 @@ supports some additional capabilities:
 * Convert to [`String`] via `impl Display`
 * Get a value for a dotted key as a [`YamlHash`] or [`yaml_rust2::Yaml`] via
   [`get`][`YamlHash::get`] and [`get_yaml`][`YamlHash::get_yaml`]
-* Merge a [`YamlHash`] with another [`YamlHash`] or a YAML hash string to create a new [`YamlHash`]
-  via [`merge`][`YamlHash::merge`] and [`merge_str`][`YamlHash::merge_str`]
+* Merge a [`YamlHash`] with another [`YamlHash`], YAML hash string, or YAML hash file to create a
+  new [`YamlHash`] via [`merge`][`YamlHash::merge`], [`merge_str`][`YamlHash::merge_str`], or
+  [`merge_file`][`YamlHash::merge_file`]
 
 [`serde`]: https://docs.rs/serde
 [`serde_yaml`]: https://docs.rs/serde_yaml
@@ -33,12 +34,13 @@ pub use yaml_rust2::Yaml;
 /**
 Improved YAML Hash
 
-* Convert from [`&str`] (via `impl From<&str>`
-* Convert to [`String`] (via `impl Display`)
+* Convert from [`&str`] via `impl From<&str>`
+* Convert to [`String`] via `impl Display`
 * Get a value for a dotted key as a [`YamlHash`] or [`yaml_rust2::Yaml`] via
-  [`get`][`YamlHash::get`], [`get_yaml`][`YamlHash::get_yaml`]
-* Merge a [`YamlHash`] with another [`YamlHash`] or a YAML hash string to create a new [`YamlHash`]
-  via [`merge`][`YamlHash::merge`], [`merge_str`][`YamlHash::merge_str`]
+  [`get`][`YamlHash::get`] and [`get_yaml`][`YamlHash::get_yaml`]
+* Merge a [`YamlHash`] with another [`YamlHash`], YAML hash string, or YAML hash file to create a
+  new [`YamlHash`] via [`merge`][`YamlHash::merge`], [`merge_str`][`YamlHash::merge_str`], or
+  [`merge_file`][`YamlHash::merge_file`]
 
 */
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
@@ -50,6 +52,44 @@ impl YamlHash {
     /// Create a new empty [`YamlHash`]
     pub fn new() -> YamlHash {
         YamlHash::default()
+    }
+
+    /**
+    Merge this [`YamlHash`] with another [`YamlHash`] to create a new [`YamlHash`]
+
+    ```
+    use yaml_hash::YamlHash;
+
+    let hash = YamlHash::from("\
+    fruit:
+      apple: 1
+      banana: 2\
+    ");
+
+    let other = YamlHash::from("\
+    fruit:
+      cherry:
+        sweet: 1
+        tart: 2\
+    ");
+
+    assert_eq!(
+        hash.merge(&other).unwrap().to_string(),
+        "\
+    fruit:
+      apple: 1
+      banana: 2
+      cherry:
+        sweet: 1
+        tart: 2\
+        ",
+    );
+    ```
+    */
+    pub fn merge(&self, other: &YamlHash) -> Result<YamlHash> {
+        let mut r = self.clone();
+        r.data = merge(&r.data, &other.data);
+        Ok(r)
     }
 
     /**
@@ -99,7 +139,7 @@ impl YamlHash {
     }
 
     /**
-    Merge this [`YamlHash`] with another [`YamlHash`] to create a new [`YamlHash`]
+    Merge this [`YamlHash`] with a YAML hash file to create a new [`YamlHash`]
 
     ```
     use yaml_hash::YamlHash;
@@ -110,30 +150,23 @@ impl YamlHash {
       banana: 2\
     ");
 
-    let other = YamlHash::from("\
-    fruit:
-      cherry:
-        sweet: 1
-        tart: 2\
-    ");
+    let hash = hash.merge_file("tests/b.yaml").unwrap();
 
     assert_eq!(
-        hash.merge(&other).unwrap().to_string(),
+        hash.to_string(),
         "\
     fruit:
       apple: 1
       banana: 2
-      cherry:
-        sweet: 1
-        tart: 2\
+      cherry: 3\
         ",
     );
     ```
     */
-    pub fn merge(&self, other: &YamlHash) -> Result<YamlHash> {
-        let mut r = self.clone();
-        r.data = merge(&r.data, &other.data);
-        Ok(r)
+    pub fn merge_file(&self, s: &str) -> Result<YamlHash> {
+        let path = std::path::Path::new(s);
+        let yaml = std::fs::read_to_string(path)?;
+        self.merge_str(&yaml)
     }
 
     /**
