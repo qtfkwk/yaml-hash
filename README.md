@@ -12,9 +12,9 @@ supports some additional capabilities:
 * Convert from [`&str`] via `impl From<&str>`
 * Convert to [`String`] via `impl Display`
 * Get a value for a dotted key as a [`YamlHash`] or [`yaml_rust2::Yaml`] via
-  [`get`][`YamlHash::get`], [`get_yaml`][`YamlHash::get_yaml`]
+  [`get`][`YamlHash::get`] and [`get_yaml`][`YamlHash::get_yaml`]
 * Merge a [`YamlHash`] with another [`YamlHash`] or a YAML hash string to create a new [`YamlHash`]
-  via [`merge`][`YamlHash::merge`], [`merge_str`][`YamlHash::merge_str`]
+  via [`merge`][`YamlHash::merge`] and [`merge_str`][`YamlHash::merge_str`]
 
 [`&str`]: https://doc.rust-lang.org/nightly/std/primitive.str.html
 [`serde`]: https://docs.rs/serde
