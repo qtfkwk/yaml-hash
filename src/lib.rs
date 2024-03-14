@@ -13,7 +13,8 @@ supports some additional capabilities:
 * Convert from [`&str`] via `impl From<&str>`
 * Convert to [`String`] via `impl Display`
 * Get a value for a dotted key as a [`YamlHash`] or [`yaml_rust2::Yaml`] via
-  [`get`][`YamlHash::get`] and [`get_yaml`][`YamlHash::get_yaml`]
+  [`get`][`YamlHash::get`] and [`get_yaml`][`YamlHash::get_yaml`]; return the root hash if the key
+  is `""`.
 * Merge a [`YamlHash`] with another [`YamlHash`], YAML hash string, or YAML hash file to create a
   new [`YamlHash`] via [`merge`][`YamlHash::merge`], [`merge_str`][`YamlHash::merge_str`], or
   [`merge_file`][`YamlHash::merge_file`]
@@ -191,7 +192,7 @@ impl YamlHash {
     ```
     */
     pub fn get_yaml(&self, key: &str) -> Result<Yaml> {
-        get_yaml(key, &Yaml::Hash(self.data.clone()), "")
+        get_yaml(key, ".", &Yaml::Hash(self.data.clone()), "")
     }
 
     /**
@@ -265,28 +266,31 @@ fn merge(a: &Hash, b: &Hash) -> Hash {
     r
 }
 
-fn get_yaml(key: &str, yaml: &Yaml, full_key: &str) -> Result<Yaml> {
-    let mut s = key.split('.');
-    let key = s.next().unwrap();
-    let yaml_key = Yaml::String(key.to_string());
-    let next_key = s.collect::<Vec<&str>>().join(".");
+fn get_yaml(key: &str, sep: &str, yaml: &Yaml, full: &str) -> Result<Yaml> {
+    if key.is_empty() {
+        return Ok(yaml.clone());
+    }
+
+    let mut s = key.split(sep);
+    let this = s.next().unwrap();
+    let next = s.collect::<Vec<&str>>().join(sep);
 
     match yaml {
-        Yaml::Hash(hash) => match hash.get(&yaml_key) {
+        Yaml::Hash(hash) => match hash.get(&Yaml::String(this.to_string())) {
             Some(v) => {
-                if next_key.is_empty() {
+                if next.is_empty() {
                     Ok(v.clone())
                 } else {
-                    let full_key = if full_key.is_empty() {
+                    let full = if full.is_empty() {
                         key.to_string()
                     } else {
-                        format!("{full_key}.{key}")
+                        format!("{full}.{this}")
                     };
-                    get_yaml(&next_key, v, &full_key)
+                    get_yaml(&next, sep, v, &full)
                 }
             }
-            None => Err(anyhow!("Invalid key: {full_key:?}")),
+            None => Err(anyhow!("Invalid key: {full:?}")),
         },
-        _ => Err(anyhow!("Value for key {full_key:?} is not a hash")),
+        _ => Err(anyhow!("Value for key {full:?} is not a hash")),
     }
 }

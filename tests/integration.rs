@@ -230,9 +230,12 @@ fn merge_multiple_file_file_with_conflict() {
 fn get() {
     let hash = YamlHash::new();
 
-    let hash = hash
-        .merge_str("fruit:\n  apple: 1\n  banana: 2\n  cherry:\n    sweet: 3")
-        .unwrap();
+    let yaml = "fruit:\n  apple: 1\n  banana: 2\n  cherry:\n    sweet: 3";
+
+    let hash = hash.merge_str(yaml).unwrap();
+
+    let root = hash.get("").unwrap();
+    assert_eq!(root.to_string(), yaml);
 
     let fruit = hash.get("fruit").unwrap();
     assert_eq!(

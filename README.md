@@ -12,7 +12,8 @@ supports some additional capabilities:
 * Convert from [`&str`] via `impl From<&str>`
 * Convert to [`String`] via `impl Display`
 * Get a value for a dotted key as a [`YamlHash`] or [`yaml_rust2::Yaml`] via
-  [`get`][`YamlHash::get`] and [`get_yaml`][`YamlHash::get_yaml`]
+  [`get`][`YamlHash::get`] and [`get_yaml`][`YamlHash::get_yaml`]; return the root hash if the key
+  is `""`.
 * Merge a [`YamlHash`] with another [`YamlHash`], YAML hash string, or YAML hash file to create a
   new [`YamlHash`] via [`merge`][`YamlHash::merge`], [`merge_str`][`YamlHash::merge_str`], or
   [`merge_file`][`YamlHash::merge_file`]
