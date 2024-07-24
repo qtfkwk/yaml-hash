@@ -250,18 +250,20 @@ fn merge(a: &Hash, b: &Hash) -> Hash {
     let mut r = a.clone();
     for (k, v) in b.iter() {
         if let Yaml::Hash(bh) = v {
-            if let linked_hash_map::Entry::Occupied(e) = r.entry(k.clone()) {
-                if let Yaml::Hash(rh) = e.get().clone() {
-                    r.entry(k.clone())
-                        .and_modify(|e| *e = Yaml::Hash(merge(&rh, bh)))
-                        .or_insert_with(|| Yaml::Hash(merge(&rh, bh)));
-                    continue;
+            if let Some(Yaml::Hash(rh)) = r.get(k) {
+                if r.contains_key(k) {
+                    r.replace(k.clone(), Yaml::Hash(merge(rh, bh)));
+                } else {
+                    r.insert(k.clone(), Yaml::Hash(merge(rh, bh)));
                 }
+                continue;
             }
         }
-        r.entry(k.clone())
-            .and_modify(|e| *e = v.clone())
-            .or_insert_with(|| v.clone());
+        if r.contains_key(k) {
+            r.replace(k.clone(), v.clone());
+        } else {
+            r.insert(k.clone(), v.clone());
+        }
     }
     r
 }
