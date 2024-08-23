@@ -40,7 +40,7 @@ cargo clippy -- -D clippy::all
 * `**/*.rs`
 
 ```
-cargo test --release
+cargo test
 ```
 
 # build
@@ -132,6 +132,15 @@ cargo clean
 tokei; echo
 cocomo -o sloccount
 cocomo
+```
+
+# commit
+
+```bash
+set -xeo pipefail
+V=$(toml get -r Cargo.toml package.version)
+git commit -m "$V"
+git tag -a "$V" -m "$V"
 ```
 
 # publish
