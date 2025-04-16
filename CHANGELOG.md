@@ -8,6 +8,7 @@
     * 0.4.2 (2024-10-24): Update dependencies
     * 0.4.3 (2024-12-04): Update dependencies
     * 0.4.4 (2025-02-20): Update dependencies
+    * 0.4.5 (2025-04-16): Update dependencies
 
 [`mkrs`]: https://crates.io/crates/mkrs
 
