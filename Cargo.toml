@@ -1,11 +1,11 @@
 [package]
 name = "yaml-hash"
-version = "0.4.5"
-edition = "2021"
+version = "0.5.0"
+edition = "2024"
 description = "Improved YAML Hash"
 repository = "https://github.com/qtfkwk/yaml-hash"
 license = "MIT"
 
 [dependencies]
-anyhow = "1.0.98"
-yaml-rust2 = "0.10.1"
+anyhow = "1.0.99"
+yaml-rust2 = "0.10.3"

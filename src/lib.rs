@@ -25,8 +25,8 @@ supports some additional capabilities:
 
 //--------------------------------------------------------------------------------------------------
 
-use anyhow::{anyhow, Result};
-use yaml_rust2::{yaml::Hash, YamlEmitter, YamlLoader};
+use anyhow::{Result, anyhow};
+use yaml_rust2::{YamlEmitter, YamlLoader, yaml::Hash};
 
 pub use yaml_rust2::Yaml;
 
@@ -249,15 +249,15 @@ impl From<&str> for YamlHash {
 fn merge(a: &Hash, b: &Hash) -> Hash {
     let mut r = a.clone();
     for (k, v) in b.iter() {
-        if let Yaml::Hash(bh) = v {
-            if let Some(Yaml::Hash(rh)) = r.get(k) {
-                if r.contains_key(k) {
-                    r.replace(k.clone(), Yaml::Hash(merge(rh, bh)));
-                } else {
-                    r.insert(k.clone(), Yaml::Hash(merge(rh, bh)));
-                }
-                continue;
+        if let Yaml::Hash(bh) = v
+            && let Some(Yaml::Hash(rh)) = r.get(k)
+        {
+            if r.contains_key(k) {
+                r.replace(k.clone(), Yaml::Hash(merge(rh, bh)));
+            } else {
+                r.insert(k.clone(), Yaml::Hash(merge(rh, bh)));
             }
+            continue;
         }
         if r.contains_key(k) {
             r.replace(k.clone(), v.clone());
