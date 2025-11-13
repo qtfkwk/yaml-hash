@@ -25,8 +25,11 @@ supports some additional capabilities:
 
 //--------------------------------------------------------------------------------------------------
 
-use anyhow::{Result, anyhow};
-use yaml_rust2::{YamlEmitter, YamlLoader, yaml::Hash};
+use {
+    anyhow::{Result, anyhow},
+    std::path::Path,
+    yaml_rust2::{YamlEmitter, YamlLoader, yaml::Hash},
+};
 
 pub use yaml_rust2::Yaml;
 
@@ -51,6 +54,7 @@ pub struct YamlHash {
 
 impl YamlHash {
     /// Create a new empty [`YamlHash`]
+    #[must_use]
     pub fn new() -> YamlHash {
         YamlHash::default()
     }
@@ -75,7 +79,7 @@ impl YamlHash {
     ");
 
     assert_eq!(
-        hash.merge(&other).unwrap().to_string(),
+        hash.merge(&other).to_string(),
         "\
     fruit:
       apple: 1
@@ -87,10 +91,11 @@ impl YamlHash {
     );
     ```
     */
-    pub fn merge(&self, other: &YamlHash) -> Result<YamlHash> {
+    #[must_use]
+    pub fn merge(&self, other: &YamlHash) -> YamlHash {
         let mut r = self.clone();
         r.data = merge(&r.data, &other.data);
-        Ok(r)
+        r
     }
 
     /**
@@ -124,6 +129,10 @@ impl YamlHash {
         ",
     );
     ```
+
+    # Errors
+
+    Returns an error if the YAML string is not a hash
     */
     pub fn merge_str(&self, s: &str) -> Result<YamlHash> {
         let mut r = self.clone();
@@ -163,9 +172,12 @@ impl YamlHash {
         ",
     );
     ```
+
+    # Errors
+
+    Returns an error if not able to read the file at the given path to a string
     */
-    pub fn merge_file(&self, s: &str) -> Result<YamlHash> {
-        let path = std::path::Path::new(s);
+    pub fn merge_file<P: AsRef<Path>>(&self, path: P) -> Result<YamlHash> {
         let yaml = std::fs::read_to_string(path)?;
         self.merge_str(&yaml)
     }
@@ -190,6 +202,10 @@ impl YamlHash {
         Yaml::Integer(2),
     );
     ```
+
+    # Errors
+
+    Returns an error if the given key is not valid or the value is not a hash
     */
     pub fn get_yaml(&self, key: &str) -> Result<Yaml> {
         get_yaml(key, ".", &Yaml::Hash(self.data.clone()), "")
@@ -218,6 +234,10 @@ impl YamlHash {
         "),
     );
     ```
+
+    # Errors
+
+    Returns an error if the given key is not valid or the value is not a hash
     */
     pub fn get(&self, key: &str) -> Result<YamlHash> {
         match self.get_yaml(key)?.into_hash() {
@@ -248,7 +268,7 @@ impl From<&str> for YamlHash {
 
 fn merge(a: &Hash, b: &Hash) -> Hash {
     let mut r = a.clone();
-    for (k, v) in b.iter() {
+    for (k, v) in b {
         if let Yaml::Hash(bh) = v
             && let Some(Yaml::Hash(rh)) = r.get(k)
         {
