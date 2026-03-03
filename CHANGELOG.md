@@ -15,6 +15,7 @@
     * 0.5.1 (2025-10-27): Update dependencies
 * 0.6.0 (2025-11-13): clippy fixes
     * 0.6.1 (2025-11-14): Update dependencies (none); fix changelog
+    * 0.6.2 (2026-03-03): Update dependencies
 
 [`mkrs`]: https://crates.io/crates/mkrs
 
