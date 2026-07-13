@@ -16,6 +16,9 @@
 * 0.6.0 (2025-11-13): clippy fixes
     * 0.6.1 (2025-11-14): Update dependencies (none); fix changelog
     * 0.6.2 (2026-03-03): Update dependencies
+* 0.7.0 (2026-07-13): Replace [`yaml-rust2`] dependency with [`serde_yaml_ng`] (Breaking changes: `Yaml` => `Value`, `Hash` => `Mapping`)
 
 [`mkrs`]: https://crates.io/crates/mkrs
+[`serde_yaml_ng`]: https://crates.io/crates/serde_yaml_ng
+[`yaml-rust2`]: https://crates.io/crates/yaml-rust2
 

@@ -1,17 +1,17 @@
 Improved YAML Hash
 
 If the YAML data you're working with is well-defined and you want to write the necessary types, you
-should use [`serde`] and [`serde_yaml`].
+should use [`serde`] and [`serde_yaml_ng`].
 
-Otherwise, [`yaml_rust2`] provides a foundation for working with varied YAML data or when you don't
+Otherwise, [`yaml-hash`] provides a foundation for working with varied YAML data or when you don't
 want to write the necessary types.
 
-This crate provides the [`YamlHash`] struct, which is a wrapper for [`yaml_rust2::yaml::Hash`], and
+This crate provides the [`YamlHash`] struct, which is a wrapper for [`serde_yaml_ng::Mapping`], and
 supports some additional capabilities:
 
 * Convert from [`&str`] via `impl From<&str>`
 * Convert to [`String`] via `impl Display`
-* Get a value for a dotted key as a [`YamlHash`] or [`yaml_rust2::Yaml`] via
+* Get a value for a dotted key as a [`YamlHash`] or [`serde_yaml_ng::Value`] via
   [`get`][`YamlHash::get`] and [`get_yaml`][`YamlHash::get_yaml`]; return the root hash if the key
   is `""`.
 * Merge a [`YamlHash`] with another [`YamlHash`], YAML hash string, or YAML hash file to create a
@@ -20,8 +20,9 @@ supports some additional capabilities:
 
 [`&str`]: https://doc.rust-lang.org/nightly/std/primitive.str.html
 [`serde`]: https://docs.rs/serde
-[`serde_yaml`]: https://docs.rs/serde_yaml
+[`serde_yaml_ng`]: https://docs.rs/serde_yaml_ng
 [`String`]: https://doc.rust-lang.org/nightly/alloc/string/struct.String.html
+[`yaml-hash`]: https://docs.rs/yaml-hash
 [`yaml_rust2`]: https://docs.rs/yaml-rust2
 [`yaml_rust2::Yaml`]: https://docs.rs/yaml-rust2/latest/yaml_rust2/yaml/enum.Yaml.html
 [`yaml_rust2::yaml::Hash`]: https://docs.rs/yaml-rust2/latest/yaml_rust2/yaml/type.Hash.html

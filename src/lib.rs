@@ -2,17 +2,17 @@
 Improved YAML Hash
 
 If the YAML data you're working with is well-defined and you want to write the necessary types, you
-should use [`serde`] and [`serde_yaml`].
+should use [`serde`] and [`serde_yaml_ng`].
 
-Otherwise, [`yaml_rust2`] provides a foundation for working with varied YAML data or when you don't
+Otherwise, [`yaml-hash`] provides a foundation for working with varied YAML data or when you don't
 want to write the necessary types.
 
-This crate provides the [`YamlHash`] struct, which is a wrapper for [`yaml_rust2::yaml::Hash`], and
+This crate provides the [`YamlHash`] struct, which is a wrapper for [`serde_yaml_ng::Mapping`], and
 supports some additional capabilities:
 
 * Convert from [`&str`] via `impl From<&str>`
 * Convert to [`String`] via `impl Display`
-* Get a value for a dotted key as a [`YamlHash`] or [`yaml_rust2::Yaml`] via
+* Get a value for a dotted key as a [`YamlHash`] or [`serde_yaml_ng::Value`] via
   [`get`][`YamlHash::get`] and [`get_yaml`][`YamlHash::get_yaml`]; return the root hash if the key
   is `""`.
 * Merge a [`YamlHash`] with another [`YamlHash`], YAML hash string, or YAML hash file to create a
@@ -20,7 +20,8 @@ supports some additional capabilities:
   [`merge_file`][`YamlHash::merge_file`]
 
 [`serde`]: https://docs.rs/serde
-[`serde_yaml`]: https://docs.rs/serde_yaml
+[`serde_yaml_ng`]: https://crates.io/crates/serde_yaml_ng
+[`yaml-hash`]: https://crates.io/crates/yaml-hash
 */
 
 //--------------------------------------------------------------------------------------------------
@@ -28,28 +29,26 @@ supports some additional capabilities:
 use {
     anyhow::{Result, anyhow},
     std::path::Path,
-    yaml_rust2::{YamlEmitter, YamlLoader, yaml::Hash},
 };
 
-pub use yaml_rust2::Yaml;
+pub use serde_yaml_ng::{Mapping, Value};
 
 //--------------------------------------------------------------------------------------------------
 
 /**
 Improved YAML Hash
 
-* Convert from [`&str`] via `impl From<&str>`
-* Convert to [`String`] via `impl Display`
-* Get a value for a dotted key as a [`YamlHash`] or [`yaml_rust2::Yaml`] via
+* Convert from YAML [`&str`] via `impl From<&str>`
+* Convert to YAML [`String`] via `impl Display`
+* Get a value for a dotted key as a [`YamlHash`] or [`serde_yaml_ng::Value`] via
   [`get`][`YamlHash::get`] and [`get_yaml`][`YamlHash::get_yaml`]
 * Merge a [`YamlHash`] with another [`YamlHash`], YAML hash string, or YAML hash file to create a
   new [`YamlHash`] via [`merge`][`YamlHash::merge`], [`merge_str`][`YamlHash::merge_str`], or
   [`merge_file`][`YamlHash::merge_file`]
-
 */
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct YamlHash {
-    data: Hash,
+    data: Mapping,
 }
 
 impl YamlHash {
@@ -68,14 +67,14 @@ impl YamlHash {
     let hash = YamlHash::from("\
     fruit:
       apple: 1
-      banana: 2\
+      banana: 2
     ");
 
     let other = YamlHash::from("\
     fruit:
       cherry:
         sweet: 1
-        tart: 2\
+        tart: 2
     ");
 
     assert_eq!(
@@ -86,9 +85,8 @@ impl YamlHash {
       banana: 2
       cherry:
         sweet: 1
-        tart: 2\
-        ",
-    );
+        tart: 2
+    ");
     ```
     */
     #[must_use]
@@ -107,14 +105,14 @@ impl YamlHash {
     let hash = YamlHash::from("\
     fruit:
       apple: 1
-      banana: 2\
+      banana: 2
     ");
 
     let hash = hash.merge_str("\
     fruit:
       cherry:
         sweet: 1
-        tart: 2\
+        tart: 2
     ").unwrap();
 
     assert_eq!(
@@ -125,9 +123,8 @@ impl YamlHash {
       banana: 2
       cherry:
         sweet: 1
-        tart: 2\
-        ",
-    );
+        tart: 2
+    ");
     ```
 
     # Errors
@@ -137,15 +134,15 @@ impl YamlHash {
     pub fn merge_str(&self, s: &str) -> Result<YamlHash> {
         let mut r = self.clone();
 
-        for doc in YamlLoader::load_from_str(s)? {
-            if let Yaml::Hash(h) = doc {
-                r.data = merge(&r.data, &h);
-            } else {
-                return Err(anyhow!("YAML string is not a hash: {doc:?}"));
-            }
-        }
+        let v: Value = serde_yaml_ng::from_str(s)?;
 
-        Ok(r)
+        if let Value::Mapping(m) = v {
+            r.data = merge(&r.data, &m);
+
+            Ok(r)
+        } else {
+            Err(anyhow!("YAML string is not a hash: {v:?}"))
+        }
     }
 
     /**
@@ -157,7 +154,7 @@ impl YamlHash {
     let hash = YamlHash::from("\
     fruit:
       apple: 1
-      banana: 2\
+      banana: 2
     ");
 
     let hash = hash.merge_file("tests/b.yaml").unwrap();
@@ -168,9 +165,8 @@ impl YamlHash {
     fruit:
       apple: 1
       banana: 2
-      cherry: 3\
-        ",
-    );
+      cherry: 3
+    ");
     ```
 
     # Errors
@@ -183,10 +179,10 @@ impl YamlHash {
     }
 
     /**
-    Get the value for a dotted key as a [`Yaml`]
+    Get the value for a dotted key as a [`Value`]
 
     ```
-    use yaml_hash::{Yaml, YamlHash};
+    use yaml_hash::{Value, YamlHash};
 
     let hash = YamlHash::from("\
     fruit:
@@ -194,12 +190,12 @@ impl YamlHash {
       banana: 2
       cherry:
         sweet: 1
-        tart: 2\
+        tart: 2
     ");
 
     assert_eq!(
         hash.get_yaml("fruit.cherry.tart").unwrap(),
-        Yaml::Integer(2),
+        Value::Number(2.into()),
     );
     ```
 
@@ -207,8 +203,8 @@ impl YamlHash {
 
     Returns an error if the given key is not valid or the value is not a hash
     */
-    pub fn get_yaml(&self, key: &str) -> Result<Yaml> {
-        get_yaml(key, ".", &Yaml::Hash(self.data.clone()), "")
+    pub fn get_yaml(&self, key: &str) -> Result<Value> {
+        get_yaml(key, ".", &Value::Mapping(self.data.clone()), "")
     }
 
     /**
@@ -223,15 +219,15 @@ impl YamlHash {
       banana: 2
       cherry:
         sweet: 1
-        tart: 2\
+        tart: 2
     ");
 
     assert_eq!(
         hash.get("fruit.cherry").unwrap(),
         YamlHash::from("\
     sweet: 1
-    tart: 2\
-        "),
+    tart: 2
+    "),
     );
     ```
 
@@ -240,8 +236,8 @@ impl YamlHash {
     Returns an error if the given key is not valid or the value is not a hash
     */
     pub fn get(&self, key: &str) -> Result<YamlHash> {
-        match self.get_yaml(key)?.into_hash() {
-            Some(data) => Ok(YamlHash { data }),
+        match self.get_yaml(key)?.as_mapping() {
+            Some(data) => Ok(YamlHash { data: data.clone() }),
             None => Err(anyhow!("Value for {key:?} is not a hash")),
         }
     }
@@ -249,11 +245,11 @@ impl YamlHash {
 
 impl std::fmt::Display for YamlHash {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let mut r = String::new();
-        let mut emitter = YamlEmitter::new(&mut r);
-        emitter.dump(&Yaml::Hash(self.data.clone())).unwrap();
-        r.replace_range(..4, ""); // remove "---\n" at beginning
-        write!(f, "{r}")
+        if let Ok(yaml) = serde_yaml_ng::to_string(&self.data) {
+            write!(f, "{yaml}")
+        } else {
+            Err(std::fmt::Error)
+        }
     }
 }
 
@@ -266,29 +262,32 @@ impl From<&str> for YamlHash {
 
 //--------------------------------------------------------------------------------------------------
 
-fn merge(a: &Hash, b: &Hash) -> Hash {
+fn merge(a: &Mapping, b: &Mapping) -> Mapping {
     let mut r = a.clone();
     for (k, v) in b {
-        if let Yaml::Hash(bh) = v
-            && let Some(Yaml::Hash(rh)) = r.get(k)
+        if let Value::Mapping(bh) = v
+            && let Some(Value::Mapping(rh)) = r.get(k)
         {
             if r.contains_key(k) {
-                r.replace(k.clone(), Yaml::Hash(merge(rh, bh)));
+                *r.get_mut(k).expect("get mut") = Value::Mapping(merge(rh, bh));
             } else {
-                r.insert(k.clone(), Yaml::Hash(merge(rh, bh)));
+                r.insert(k.clone(), Value::Mapping(merge(rh, bh)));
             }
+
             continue;
         }
+
         if r.contains_key(k) {
-            r.replace(k.clone(), v.clone());
+            *r.get_mut(k).expect("get mut") = v.clone();
         } else {
             r.insert(k.clone(), v.clone());
         }
     }
+
     r
 }
 
-fn get_yaml(key: &str, sep: &str, yaml: &Yaml, full: &str) -> Result<Yaml> {
+fn get_yaml(key: &str, sep: &str, yaml: &Value, full: &str) -> Result<Value> {
     if key.is_empty() {
         return Ok(yaml.clone());
     }
@@ -298,7 +297,7 @@ fn get_yaml(key: &str, sep: &str, yaml: &Yaml, full: &str) -> Result<Yaml> {
     let next = s.collect::<Vec<&str>>().join(sep);
 
     match yaml {
-        Yaml::Hash(hash) => match hash.get(&Yaml::String(this.to_string())) {
+        Value::Mapping(hash) => match hash.get(Value::String(this.to_string())) {
             Some(v) => {
                 if next.is_empty() {
                     Ok(v.clone())
@@ -308,6 +307,7 @@ fn get_yaml(key: &str, sep: &str, yaml: &Yaml, full: &str) -> Result<Yaml> {
                     } else {
                         format!("{full}.{this}")
                     };
+
                     get_yaml(&next, sep, v, &full)
                 }
             }
