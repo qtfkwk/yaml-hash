@@ -20,7 +20,6 @@ supports some additional capabilities:
   [`merge_file`][`YamlHash::merge_file`]
 
 [`serde`]: https://docs.rs/serde
-[`serde_yaml_ng`]: https://crates.io/crates/serde_yaml_ng
 [`yaml-hash`]: https://crates.io/crates/yaml-hash
 */
 

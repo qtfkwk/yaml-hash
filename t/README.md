@@ -21,6 +21,8 @@ supports some additional capabilities:
 [`&str`]: https://doc.rust-lang.org/nightly/std/primitive.str.html
 [`serde`]: https://docs.rs/serde
 [`serde_yaml_ng`]: https://docs.rs/serde_yaml_ng
+[`serde_yaml_ng::Mapping`]: https://docs.rs/serde_yaml_ng/latest/serde_yaml_ng/struct.Mapping.html
+[`serde_yaml_ng::Value`]: https://docs.rs/serde_yaml_ng/latest/serde_yaml_ng/enum.Value.html
 [`String`]: https://doc.rust-lang.org/nightly/alloc/string/struct.String.html
 [`yaml-hash`]: https://docs.rs/yaml-hash
 [`yaml_rust2`]: https://docs.rs/yaml-rust2

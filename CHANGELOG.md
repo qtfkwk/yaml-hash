@@ -18,6 +18,7 @@
     * 0.6.2 (2026-03-03): Update dependencies
 * 0.7.0 (2026-07-13): Replace [`yaml-rust2`] dependency with [`serde_yaml_ng`] (Breaking changes: `Yaml` => `Value`, `Hash` => `Mapping`)
     * 0.7.1 (2026-07-14): Fix panic for empty string
+    * 0.7.2 (2026-07-14): Fix links in readme
 
 [`mkrs`]: https://crates.io/crates/mkrs
 [`serde_yaml_ng`]: https://crates.io/crates/serde_yaml_ng
