@@ -27,6 +27,12 @@ fn to_string() {
     assert_eq!(hash.to_string(), "{}\n");
 }
 
+#[test]
+fn empty() {
+    let hash = YamlHash::from("");
+    assert_eq!(format!("{:?}", hash), "YamlHash { data: Mapping {} }");
+}
+
 //--------------------------------------------------------------------------------------------------
 
 #[test]

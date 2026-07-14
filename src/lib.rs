@@ -134,6 +134,8 @@ impl YamlHash {
     pub fn merge_str(&self, s: &str) -> Result<YamlHash> {
         let mut r = self.clone();
 
+        let s = if s.is_empty() { "{}" } else { s };
+
         let v: Value = serde_yaml_ng::from_str(s)?;
 
         if let Value::Mapping(m) = v {
