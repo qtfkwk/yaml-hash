@@ -1,6 +1,6 @@
 [package]
 name = "yaml-hash"
-version = "0.7.2"
+version = "0.8.0"
 edition = "2024"
 description = "Improved YAML Hash"
 repository = "https://github.com/qtfkwk/yaml-hash"
@@ -8,4 +8,5 @@ license = "MIT"
 
 [dependencies]
 anyhow = "1"
+serde = { version = "1", features = ["derive"] }
 serde_yaml_ng = "0"

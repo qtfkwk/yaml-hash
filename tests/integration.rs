@@ -1,8 +1,18 @@
-use yaml_hash::*;
+//--------------------------------------------------------------------------------------------------
+// Crates
+
+use {
+    serde::{Deserialize, Serialize},
+    yaml_hash::*,
+};
+
+//--------------------------------------------------------------------------------------------------
+// Tests
 
 #[test]
 fn debug_pretty() {
     let hash = YamlHash::new();
+
     assert_eq!(
         format!("{:#?}", hash),
         "YamlHash {\n    data: Mapping {},\n}",
@@ -12,34 +22,39 @@ fn debug_pretty() {
 #[test]
 fn debug() {
     let hash = YamlHash::new();
+
     assert_eq!(format!("{:?}", hash), "YamlHash { data: Mapping {} }");
 }
 
 #[test]
 fn display() {
     let hash = YamlHash::new();
+
     assert_eq!(format!("{}", hash), "{}\n");
 }
 
 #[test]
 fn to_string() {
     let hash = YamlHash::new();
+
     assert_eq!(hash.to_string(), "{}\n");
 }
 
 #[test]
 fn empty() {
     let hash = YamlHash::from("");
+
     assert_eq!(format!("{:?}", hash), "YamlHash { data: Mapping {} }");
 }
 
-//--------------------------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #[test]
 fn merge_str() {
     let hash = YamlHash::new();
     let yaml = "fruit:\n  apple: 1\n  banana: 2\n";
     let hash = hash.merge_str(&yaml).unwrap();
+
     assert_eq!(hash.to_string(), yaml);
 }
 
@@ -133,13 +148,14 @@ fn merge_multiple_str_str_with_conflict_deep() {
     assert_eq!(hash.to_string(), result);
 }
 
-//--------------------------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #[test]
 fn merge_file() {
     let hash = YamlHash::new();
     let hash = hash.merge_file("tests/a.yaml").unwrap();
     let result = "fruit:\n  apple: 1\n  banana: 2\n";
+
     assert_eq!(hash.to_string(), result);
 }
 
@@ -233,7 +249,7 @@ fn merge_multiple_file_file_with_conflict() {
     assert_eq!(hash.to_string(), result);
 }
 
-//--------------------------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #[test]
 fn get() {
@@ -266,4 +282,124 @@ fn get() {
 
     let sweet2 = hash.get_yaml("fruit.cherry.sweet").unwrap();
     assert_eq!(sweet2, Value::Number(3.into()));
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#[test]
+fn serde_struct_newtype() {
+    #[derive(Debug, Deserialize, PartialEq, Serialize)]
+    struct Something(YamlHash);
+
+    let yaml = "\
+fruit:
+  apple: 1
+  banana: 2
+\
+    ";
+
+    let something = Something(YamlHash::from(yaml));
+
+    let serialized = serde_yaml_ng::to_string(&something).expect("serialize something");
+    assert_eq!(serialized, yaml);
+
+    let deserialized: Something =
+        serde_yaml_ng::from_str(&serialized).expect("deserialize something");
+    assert_eq!(deserialized, something);
+}
+
+#[test]
+fn serde_struct() {
+    #[derive(Debug, Deserialize, PartialEq, Serialize)]
+    struct Something {
+        #[serde(flatten)]
+        yaml: YamlHash,
+    }
+
+    let yaml = "\
+fruit:
+  apple: 1
+  banana: 2
+\
+    ";
+
+    let something = Something {
+        yaml: YamlHash::from(yaml),
+    };
+
+    let serialized = serde_yaml_ng::to_string(&something).expect("serialize something");
+    assert_eq!(serialized, yaml);
+
+    let deserialized: Something =
+        serde_yaml_ng::from_str(&serialized).expect("deserialize something");
+    assert_eq!(deserialized, something);
+}
+
+#[test]
+fn serde_enum() {
+    #[derive(Debug, Deserialize, PartialEq, Serialize)]
+    enum Something {
+        Yaml(YamlHash),
+    }
+
+    let yaml = "\
+fruit:
+  apple: 1
+  banana: 2
+\
+    ";
+
+    let something_yaml = "\
+!Yaml
+fruit:
+  apple: 1
+  banana: 2
+\
+    ";
+
+    let something = Something::Yaml(YamlHash::from(yaml));
+
+    let serialized = serde_yaml_ng::to_string(&something).expect("serialize something");
+    assert_eq!(serialized, something_yaml);
+
+    let deserialized: Something =
+        serde_yaml_ng::from_str(&serialized).expect("deserialize something");
+    assert_eq!(deserialized, something);
+}
+
+#[test]
+fn serde_enum_struct_variant() {
+    #[derive(Debug, Deserialize, PartialEq, Serialize)]
+    enum Something {
+        Yaml {
+            #[serde(flatten)]
+            yaml: YamlHash,
+        },
+    }
+
+    let yaml = "\
+fruit:
+  apple: 1
+  banana: 2
+\
+    ";
+
+    let something_yaml = "\
+!Yaml
+fruit:
+  apple: 1
+  banana: 2
+\
+    ";
+
+    let something = Something::Yaml {
+        yaml: YamlHash::from(yaml),
+    };
+
+    let serialized = serde_yaml_ng::to_string(&something).expect("serialize something");
+    assert_eq!(serialized, something_yaml);
+
+    let deserialized: Something =
+        serde_yaml_ng::from_str(&serialized).expect("deserialize something");
+    assert_eq!(deserialized, something);
 }
