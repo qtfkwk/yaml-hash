@@ -20,6 +20,7 @@
     * 0.7.1 (2026-07-14): Fix panic for empty string
     * 0.7.2 (2026-07-14): Fix links in readme
 * 0.8.0 (2026-09-10): Derive serialize/deserialize for `YamlHash`; prune exports; update dependencies
+    * 0.8.1 (2026-09-10): Clean up the documentation
 
 [`mkrs`]: https://crates.io/crates/mkrs
 [`serde_yaml_ng`]: https://crates.io/crates/serde_yaml_ng

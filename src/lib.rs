@@ -1,17 +1,16 @@
 /*!
 Improved YAML Hash
 
-If the YAML data you're working with is well-defined and you want to write the necessary types, you
+If the YAML data you're working with is well-defined, and you want to write the necessary types, you
 should use [`serde`] and [`serde_yaml_ng`].
+Otherwise, [`yaml-hash`] provides a foundation for working with varied YAML data.
 
-Otherwise, [`yaml-hash`] provides a foundation for working with varied YAML data or when you don't
-want to write the necessary types.
-
-This crate provides the [`YamlHash`] struct, which is a wrapper for `serde_yaml_ng::Mapping`, and
+This crate provides the [`YamlHash`] struct, which is a wrapper for [`serde_yaml_ng::Mapping`], and
 supports some additional capabilities.
 
 [`serde`]: https://docs.rs/serde
 [`yaml-hash`]: https://crates.io/crates/yaml-hash
+[`serde_yaml_ng::Mapping`]: https://docs.rs/serde_yaml_ng/latest/serde_yaml_ng/struct.Mapping.html
 */
 
 //--------------------------------------------------------------------------------------------------
@@ -33,16 +32,20 @@ pub use serde_yaml_ng::Value;
 Improved YAML Hash
 
 * Convert from YAML [`&str`] via `impl From<&str>`
+
 * Convert to YAML [`String`] via `impl Display`
+
 * Get a value for a dotted key as a [`YamlHash`] or [`serde_yaml_ng::Value`] via
   [`get`][`YamlHash::get`] and [`get_yaml`][`YamlHash::get_yaml`]
+
 * Merge a [`YamlHash`] with another [`YamlHash`], YAML hash string, or YAML hash file to create a
   new [`YamlHash`] via [`merge`][`YamlHash::merge`], [`merge_str`][`YamlHash::merge_str`], or
   [`merge_file`][`YamlHash::merge_file`]
+
 * Include a [`YamlHash`] as a type in a container type deriving/implementing [`serde::Serialize`] /
   [`serde::Deserialize`], such as a struct, newtype struct, enum variant, or enum struct variant
-    * Note that [`YamlHash`] flattens its internal [`serde_yaml_ng::Mapping`] so it can be
-      serialized / deserialized to/from the same YAML string
+    * *Note that [`YamlHash`] flattens its internal [`serde_yaml_ng::Mapping`] so it can be
+      serialized / deserialized to/from the same YAML string*
 */
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct YamlHash {
